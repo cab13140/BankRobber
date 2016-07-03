@@ -18,12 +18,15 @@ import org.bukkit.plugin.PluginManager;
 @SuppressWarnings("FieldCanBeLocal")
 public class CommandConfig implements CommandExecutor, Listener {
     private static final String CMD_MAXM = "maxmoney";
-    private static String CMD_MPM = "mpm";
+    private static String CMD_NPM = "npm";
+    private static String CMD_NG = "nuggetsCost";
     private MainPlugin plugin = new MainPlugin();
     private ConsoleCommandSender cs = plugin.getServer().getConsoleSender();
+    private boolean active = false;
+    private Player activePlayer;
 
     public void onPlayerInteract(PlayerInteractEvent e){
-        if (e.getMaterial() == Material.CHEST){
+        if (active && activePlayer == e.getPlayer() && e.getMaterial() == Material.CHEST) {
             e.setCancelled(true);
             e.getPlayer().sendMessage("Chest registered");
             Location l = e.getClickedBlock().getLocation();
@@ -31,6 +34,8 @@ public class CommandConfig implements CommandExecutor, Listener {
             plugin.getConfig().set("bank.y", l.getY());
             plugin.getConfig().set("bank.z", l.getZ());
             plugin.getConfig().set("bank.world", l.getWorld().getName());
+            active = false;
+            activePlayer = null;
         }
     }
 
@@ -38,7 +43,7 @@ public class CommandConfig implements CommandExecutor, Listener {
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (command.getName().equalsIgnoreCase("bankrobber")){
             switch (args[0].toLowerCase()) {
-                case "mpm":
+                case "npm":
                     if (args.length == 2){
                         if (NumberUtils.isNumber(args[1])){
                             if (Integer.parseInt(args[1]) >= 0){
@@ -49,22 +54,22 @@ public class CommandConfig implements CommandExecutor, Listener {
                                     }
 
                                 // Begin of the real part
-                                int mpm = Integer.parseInt(args[1]);
+                                int npm = Integer.parseInt(args[1]);
                                 MainPlugin plugin = new MainPlugin();
                                 FileConfiguration config = plugin.getConfig();
-                                config.set("moneyPerMinute",mpm);
+                                config.set("nuggetsPerMinute",npm);
                                 if (sender instanceof Player){
                                     Player p = (Player) sender;
-                                    p.sendMessage(ChatColor.GREEN + "Config updated. Mpm set to " + mpm);
+                                    p.sendMessage(ChatColor.GREEN + "Config updated. Npm set to " + npm);
                                     p.sendMessage("Reload server or reboot for changes to take effects");
                                 }else{
-                                    cs.sendMessage("Config updated. Mpm set to " + mpm);
+                                    cs.sendMessage("Config updated. Npm set to " + npm);
                                     cs.sendMessage("Reload server or reboot for changes to take effects");
                                 }
-                            }else if (sender instanceof Player) errorMessage(CMD_MPM, (Player)sender); else errorMessage(CMD_MPM);
-                        }else if (sender instanceof Player) errorMessage(CMD_MPM, (Player)sender); else errorMessage(CMD_MPM);
+                            }else if (sender instanceof Player) errorMessage(CMD_NPM, (Player)sender); else errorMessage(CMD_NPM);
+                        }else if (sender instanceof Player) errorMessage(CMD_NPM, (Player)sender); else errorMessage(CMD_NPM);
                     }else{
-                        if (sender instanceof Player) errorMessage(CMD_MPM, (Player)sender); else errorMessage(CMD_MPM);
+                        if (sender instanceof Player) errorMessage(CMD_NPM, (Player)sender); else errorMessage(CMD_NPM);
                     }
 
                 case "maxmoney":
@@ -104,11 +109,42 @@ public class CommandConfig implements CommandExecutor, Listener {
 
                         Player p = (Player) sender;
                         p.sendMessage(ChatColor.GREEN + "Open a chest to set the bank");
+                        active = true;
+                        activePlayer = p;
                         PluginManager pm = new MainPlugin().getServer().getPluginManager();
                         pm.registerEvents(this, new MainPlugin());
 
                     }else{
                         cs.sendMessage("This command must be executed in-game !");
+                    }
+
+                case "nuggetscost":
+                    if (args.length == 2){
+                        if (NumberUtils.isNumber(args[1])){
+                            if (Integer.parseInt(args[1]) >= 1){
+                                if (sender instanceof Player)
+                                    if (!((Player)sender).hasPermission("bankrobber.setConfig")){
+                                        ((Player)sender).sendMessage(ChatColor.RED + "Permission Denied");
+                                        return true;
+                                    }
+                                // Begin of the real part
+                                int nuggetsCost = Integer.parseInt(args[1]);
+                                MainPlugin plugin = new MainPlugin();
+                                FileConfiguration config = plugin.getConfig();
+                                config.set("nuggetsCost",nuggetsCost);
+                                if (sender instanceof Player){
+                                    Player p = (Player) sender;
+                                    p.sendMessage(ChatColor.GREEN + "Config updated. Nuggets Cost set to " + nuggetsCost);
+                                    p.sendMessage("Reload server or reboot for changes to take effects");
+                                }else{
+                                    cs.sendMessage("Config updated. Nuggets Cost set to " + nuggetsCost);
+                                    cs.sendMessage("Reload server or reboot for changes to take effects");
+                                }
+
+                            }else if (sender instanceof Player) errorMessage(CMD_NG, (Player)sender); else errorMessage(CMD_NG);
+                        }else if (sender instanceof Player) errorMessage(CMD_NG, (Player)sender); else errorMessage(CMD_NG);
+                    }else{
+                        if (sender instanceof Player) errorMessage(CMD_NG, (Player)sender); else errorMessage(CMD_NG);
                     }
                 default:
                     //TODO: Help on command
@@ -121,14 +157,22 @@ public class CommandConfig implements CommandExecutor, Listener {
 
     private void errorMessage(String command){
         switch (command) {
-            case "mpm":
-                cs.sendMessage("Usage: /bankrobber mpm (moneyperminute)");
+            case "npm":
+                cs.sendMessage("Usage: /bankrobber npm (nuggetsperminute)");
+            case "maxmoney":
+                cs.sendMessage("Usage: /bankrobber maxmoney (maxbankmoney)");
+            case "nuggetsCost":
+                cs.sendMessage("Usage: /bankrobber nuggetsCost (moneyPerNuggets)");
         }
     }
     private void errorMessage(String command, Player p){
         switch (command){
-            case "mpm":
-                p.sendMessage(ChatColor.RED + "Usage: /bankrobber mpm (moneyperminute)");
+            case "npm":
+                p.sendMessage(ChatColor.RED + "Usage: /bankrobber npm (nuggetsperminute)");
+            case "maxmoney":
+                p.sendMessage("Usage: /bankrobber maxmoney (maxbankmoney)");
+            case "nuggetsCost":
+                p.sendMessage("Usage: /bankrobber nuggetsCost (moneyPerNuggets)");
         }
     }
 
