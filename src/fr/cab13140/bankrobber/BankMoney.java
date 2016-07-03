@@ -8,14 +8,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class BankMoney extends BukkitRunnable{
-    private MainPlugin plugin = new MainPlugin();
+    MainPlugin p = MainPlugin.main;
 
     @Override
     public void run() {
-        Location bankLocation = plugin.bank;
+        Location bankLocation = p.bank;
         Chest bank = (Chest) bankLocation.getBlock().getState();
         Inventory bankI = bank.getBlockInventory();
-        int mpm = plugin.getConfig().getInt("moneyPerMinute");
 
         ItemStack[] inv = bankI.getContents();
 
@@ -29,9 +28,9 @@ public class BankMoney extends BukkitRunnable{
             }
         }
 
-        if (quantity <= plugin.getConfig().getInt("maxMoney")){
+        if (quantity <= p.getConfig().getInt("maxMoney")){
             if (bankI.firstEmpty() != -1) {
-                bankI.addItem(new ItemStack(Material.GOLD_NUGGET,plugin.getConfig().getInt("nuggetsPerMinute")));
+                bankI.addItem(new ItemStack(Material.GOLD_NUGGET,p.getConfig().getInt("nuggetsPerMinute")));
             }
         }
     }

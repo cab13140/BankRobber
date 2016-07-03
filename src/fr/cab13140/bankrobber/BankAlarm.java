@@ -8,7 +8,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  * Created by danit on 03/07/2016.
  */
 public class BankAlarm extends BukkitRunnable {
-    private MainPlugin p = new MainPlugin();
+    MainPlugin p = MainPlugin.main;
     @Override
     public void run() {
         World w = p.bank.getWorld();

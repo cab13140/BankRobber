@@ -1,3 +1,9 @@
 name: BankRobber
 version: 0.1
 main: fr.cab13140.bankrobber.MainPlugin
+
+commands:
+  bankrobber:
+    description: All BankRobber commands and config
+    usage: /bankrobber (command) [arg]
+    permission: bankrobber.setconfig

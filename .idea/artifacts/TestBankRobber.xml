@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="TestBankRobber">
+    <output-path>$USER_HOME$/Desktop/MineTools/SpigotTest/plugins</output-path>
+    <root id="archive" name="TestBankRobber.jar">
+      <element id="module-output" name="BankRobber" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/config.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/plugin.yml" />
+    </root>
+  </artifact>
+</component>

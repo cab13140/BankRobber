@@ -7,12 +7,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class MainPlugin extends JavaPlugin implements Listener {
+    public static MainPlugin main;
     private boolean enabled;
     private int npm;
     private int maxMoney;
@@ -20,21 +23,24 @@ public class MainPlugin extends JavaPlugin implements Listener {
     private BukkitRunnable bankMoney = new BankMoney();
     private boolean alarm;
     private BukkitRunnable bankAlarm = new BankAlarm();
+    private int nuggetsCost;
 
     @Override
     public void onEnable() {
+        main = this;
         saveDefaultConfig();
         FileConfiguration config = getConfig();
         getCommand("bankrobber").setExecutor(new CommandConfig());
-        boolean bankSet = !config.getString("bank.world").isEmpty();
+        boolean bankSet = !(Objects.equals(config.getString("bank.world"), "none"));
 
         getServer().getPluginManager().registerEvents(this, this);
 
         //Get the configs
 
         enabled = config.getBoolean("enabled");
-        npm = config.getInt("nuggetsPerMinute");
-        maxMoney = config.getInt("maxMoney");
+        npm = config.getInt("nuggetsperminute");
+        maxMoney = config.getInt("maxmoney");
+        nuggetsCost = config.getInt("nuggetscost");
 
         if (bankSet) {
             bank.setWorld(getServer().getWorld(config.getString("bank.world")));
@@ -53,7 +59,8 @@ public class MainPlugin extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-
+        saveConfig();
+        getServer().getLogger().info("Saved config !");
     }
 
     public void onChestOpen(PlayerInteractEvent e){

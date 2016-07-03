@@ -14,14 +14,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.PluginManager;
 
+import java.util.Objects;
+
 
 @SuppressWarnings("FieldCanBeLocal")
 public class CommandConfig implements CommandExecutor, Listener {
     private static final String CMD_MAXM = "maxmoney";
     private static String CMD_NPM = "npm";
     private static String CMD_NG = "nuggetsCost";
-    private MainPlugin plugin = new MainPlugin();
-    private ConsoleCommandSender cs = plugin.getServer().getConsoleSender();
+    MainPlugin p = MainPlugin.main;
+    private ConsoleCommandSender cs = p.getServer().getConsoleSender();
     private boolean active = false;
     private Player activePlayer;
 
@@ -30,10 +32,10 @@ public class CommandConfig implements CommandExecutor, Listener {
             e.setCancelled(true);
             e.getPlayer().sendMessage("Chest registered");
             Location l = e.getClickedBlock().getLocation();
-            plugin.getConfig().set("bank.x", l.getX());
-            plugin.getConfig().set("bank.y", l.getY());
-            plugin.getConfig().set("bank.z", l.getZ());
-            plugin.getConfig().set("bank.world", l.getWorld().getName());
+            p.getConfig().set("bank.x", l.getX());
+            p.getConfig().set("bank.y", l.getY());
+            p.getConfig().set("bank.z", l.getZ());
+            p.getConfig().set("bank.world", l.getWorld().getName());
             active = false;
             activePlayer = null;
         }
@@ -42,112 +44,118 @@ public class CommandConfig implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (command.getName().equalsIgnoreCase("bankrobber")){
-            switch (args[0].toLowerCase()) {
-                case "npm":
-                    if (args.length == 2){
-                        if (NumberUtils.isNumber(args[1])){
-                            if (Integer.parseInt(args[1]) >= 0){
+                if (Objects.equals(args[0].toLowerCase(), "npm")) {
+                    if (args.length == 2) {
+                        if (NumberUtils.isNumber(args[1])) {
+                            if (Integer.parseInt(args[1]) >= 0) {
                                 if (sender instanceof Player)
-                                    if (!((Player)sender).hasPermission("bankrobber.setConfig")){
-                                        ((Player)sender).sendMessage(ChatColor.RED + "Permission Denied");
+                                    if (!((Player) sender).hasPermission("bankrobber.setconfig")) {
+                                        ((Player) sender).sendMessage(ChatColor.RED + "Permission Denied");
                                         return true;
                                     }
 
                                 // Begin of the real part
                                 int npm = Integer.parseInt(args[1]);
-                                MainPlugin plugin = new MainPlugin();
-                                FileConfiguration config = plugin.getConfig();
-                                config.set("nuggetsPerMinute",npm);
-                                if (sender instanceof Player){
+                                FileConfiguration config = p.getConfig();
+                                config.set("nuggetsperminute", npm);
+                                if (sender instanceof Player) {
                                     Player p = (Player) sender;
                                     p.sendMessage(ChatColor.GREEN + "Config updated. Npm set to " + npm);
                                     p.sendMessage("Reload server or reboot for changes to take effects");
-                                }else{
+                                } else {
                                     cs.sendMessage("Config updated. Npm set to " + npm);
                                     cs.sendMessage("Reload server or reboot for changes to take effects");
                                 }
-                            }else if (sender instanceof Player) errorMessage(CMD_NPM, (Player)sender); else errorMessage(CMD_NPM);
-                        }else if (sender instanceof Player) errorMessage(CMD_NPM, (Player)sender); else errorMessage(CMD_NPM);
-                    }else{
-                        if (sender instanceof Player) errorMessage(CMD_NPM, (Player)sender); else errorMessage(CMD_NPM);
+                            } else if (sender instanceof Player) errorMessage(CMD_NPM, (Player) sender);
+                            else errorMessage(CMD_NPM);
+                        } else if (sender instanceof Player) errorMessage(CMD_NPM, (Player) sender);
+                        else errorMessage(CMD_NPM);
+                    } else {
+                        if (sender instanceof Player) errorMessage(CMD_NPM, (Player) sender);
+                        else errorMessage(CMD_NPM);
                     }
-
-                case "maxmoney":
-                    if (args.length == 2){
-                        if (NumberUtils.isNumber(args[1])){
-                            if (Integer.parseInt(args[1]) >= 1){
-                                if (sender instanceof Player)
-                                    if (!((Player)sender).hasPermission("bankrobber.setConfig")){
-                                        ((Player)sender).sendMessage(ChatColor.RED + "Permission Denied");
-                                        return true;
-                                    }
-                                // Begin of the real part
-                                int maxmoney = Integer.parseInt(args[1]);
-                                MainPlugin plugin = new MainPlugin();
-                                FileConfiguration config = plugin.getConfig();
-                                config.set("maxMoney",maxmoney);
-                                if (sender instanceof Player){
-                                    Player p = (Player) sender;
-                                    p.sendMessage(ChatColor.GREEN + "Config updated. Max money set to " + maxmoney);
-                                    p.sendMessage("Reload server or reboot for changes to take effects");
-                                }else{
-                                    cs.sendMessage("Config updated. Max money set to " + maxmoney);
-                                    cs.sendMessage("Reload server or reboot for changes to take effects");
+                }
+            if (Objects.equals(args[0].toLowerCase(), "maxmoney")) {
+                if (args.length == 2) {
+                    if (NumberUtils.isNumber(args[1])) {
+                        if (Integer.parseInt(args[1]) >= 1) {
+                            if (sender instanceof Player)
+                                if (!((Player) sender).hasPermission("bankrobber.setconfig")) {
+                                    ((Player) sender).sendMessage(ChatColor.RED + "Permission Denied");
+                                    return true;
                                 }
+                            // Begin of the real part
+                            int maxmoney = Integer.parseInt(args[1]);
+                            MainPlugin plugin = this.p;
+                            FileConfiguration config = plugin.getConfig();
+                            config.set("maxmoney", maxmoney);
+                            if (sender instanceof Player) {
+                                Player p = (Player) sender;
+                                p.sendMessage(ChatColor.GREEN + "Config updated. Max money set to " + maxmoney);
+                                p.sendMessage("Reload server or reboot for changes to take effects");
+                            } else {
+                                cs.sendMessage("Config updated. Max money set to " + maxmoney);
+                                cs.sendMessage("Reload server or reboot for changes to take effects");
+                            }
 
-                            }else if (sender instanceof Player) errorMessage(CMD_MAXM, (Player)sender); else errorMessage(CMD_MAXM);
-                        }else if (sender instanceof Player) errorMessage(CMD_MAXM, (Player)sender); else errorMessage(CMD_MAXM);
-                    }else{
-                        if (sender instanceof Player) errorMessage(CMD_MAXM, (Player)sender); else errorMessage(CMD_MAXM);
+                        } else if (sender instanceof Player) errorMessage(CMD_MAXM, (Player) sender);
+                        else errorMessage(CMD_MAXM);
+                    } else if (sender instanceof Player) errorMessage(CMD_MAXM, (Player) sender);
+                    else errorMessage(CMD_MAXM);
+                } else {
+                    if (sender instanceof Player) errorMessage(CMD_MAXM, (Player) sender);
+                    else errorMessage(CMD_MAXM);
+                }
+            }
+            if (Objects.equals(args[0].toLowerCase(),"bank")) {
+                if (sender instanceof Player) {
+                    if (!((Player) sender).hasPermission("bankrobber.setconfig")) {
+                        ((Player) sender).sendMessage(ChatColor.RED + "Permission Denied");
+                        return true;
                     }
-                case "bank":
-                    if (sender instanceof Player){
-                        if (!((Player)sender).hasPermission("bankrobber.setConfig")){
-                            ((Player)sender).sendMessage(ChatColor.RED + "Permission Denied");
-                            return true;
-                        }
 
-                        Player p = (Player) sender;
-                        p.sendMessage(ChatColor.GREEN + "Open a chest to set the bank");
-                        active = true;
-                        activePlayer = p;
-                        PluginManager pm = new MainPlugin().getServer().getPluginManager();
-                        pm.registerEvents(this, new MainPlugin());
+                    Player p = (Player) sender;
+                    p.sendMessage(ChatColor.GREEN + "Open a chest to set the bank");
+                    active = true;
+                    activePlayer = p;
+                    PluginManager pm = this.p.getServer().getPluginManager();
+                    pm.registerEvents(this, this.p);
 
-                    }else{
-                        cs.sendMessage("This command must be executed in-game !");
-                    }
-
-                case "nuggetscost":
-                    if (args.length == 2){
-                        if (NumberUtils.isNumber(args[1])){
-                            if (Integer.parseInt(args[1]) >= 1){
-                                if (sender instanceof Player)
-                                    if (!((Player)sender).hasPermission("bankrobber.setConfig")){
-                                        ((Player)sender).sendMessage(ChatColor.RED + "Permission Denied");
-                                        return true;
-                                    }
-                                // Begin of the real part
-                                int nuggetsCost = Integer.parseInt(args[1]);
-                                MainPlugin plugin = new MainPlugin();
-                                FileConfiguration config = plugin.getConfig();
-                                config.set("nuggetsCost",nuggetsCost);
-                                if (sender instanceof Player){
-                                    Player p = (Player) sender;
-                                    p.sendMessage(ChatColor.GREEN + "Config updated. Nuggets Cost set to " + nuggetsCost);
-                                    p.sendMessage("Reload server or reboot for changes to take effects");
-                                }else{
-                                    cs.sendMessage("Config updated. Nuggets Cost set to " + nuggetsCost);
-                                    cs.sendMessage("Reload server or reboot for changes to take effects");
+                } else {
+                    cs.sendMessage("This command must be executed in-game !");
+                }
+            }
+            if (Objects.equals(args[0].toLowerCase(),"nuggetscost")) {
+                if (args.length == 2) {
+                    if (NumberUtils.isNumber(args[1])) {
+                        if (Integer.parseInt(args[1]) >= 1) {
+                            if (sender instanceof Player)
+                                if (!((Player) sender).hasPermission("bankrobber.setConfig")) {
+                                    ((Player) sender).sendMessage(ChatColor.RED + "Permission Denied");
+                                    return true;
                                 }
+                            // Begin of the real part
+                            int nuggetsCost = Integer.parseInt(args[1]);
+                            MainPlugin plugin = this.p;
+                            FileConfiguration config = plugin.getConfig();
+                            config.set("nuggetscost", nuggetsCost);
+                            if (sender instanceof Player) {
+                                Player p = (Player) sender;
+                                p.sendMessage(ChatColor.GREEN + "Config updated. Nuggets Cost set to " + nuggetsCost);
+                                p.sendMessage("Reload server or reboot for changes to take effects");
+                            } else {
+                                cs.sendMessage("Config updated. Nuggets Cost set to " + nuggetsCost);
+                                cs.sendMessage("Reload server or reboot for changes to take effects");
+                            }
 
-                            }else if (sender instanceof Player) errorMessage(CMD_NG, (Player)sender); else errorMessage(CMD_NG);
-                        }else if (sender instanceof Player) errorMessage(CMD_NG, (Player)sender); else errorMessage(CMD_NG);
-                    }else{
-                        if (sender instanceof Player) errorMessage(CMD_NG, (Player)sender); else errorMessage(CMD_NG);
-                    }
-                default:
-                    //TODO: Help on command
+                        } else if (sender instanceof Player) errorMessage(CMD_NG, (Player) sender);
+                        else errorMessage(CMD_NG);
+                    } else if (sender instanceof Player) errorMessage(CMD_NG, (Player) sender);
+                    else errorMessage(CMD_NG);
+                } else {
+                    if (sender instanceof Player) errorMessage(CMD_NG, (Player) sender);
+                    else errorMessage(CMD_NG);
+                }
             }
             return true;
         }else {
